@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/home/HomePage.jsx";
 import CategoryPage from "./pages/category/CategoryPage";
 import EmployeePage from "./pages/employee/EmployeePage";
+import CostomerPage from "./pages/costomer/CostomerPage.jsx";
 import MasterLayout from "./components/layout/MasterLayout.jsx";
 import MasterLayoutAuth from "./components/layout/MasterLayoutAuth.jsx";
 import LoginPage from "./pages/auth/LoginPage.jsx";
@@ -17,8 +18,11 @@ const App = () => {
 
           <Route element={<MasterLayout/>}>
             <Route path="/" element={<HomePage />} />
-            <Route path="/category" element={<CategoryPage />} />
+            <Route path="product/category" element={<CategoryPage />} />
             <Route path="/employee" element={<EmployeePage />} />
+            <Route path="/customer" element={<CostomerPage />} />
+            <Route path="*" element={<h1>404-Page Not found</h1>} />
+            
           </Route>
 
           <Route element={<MasterLayoutAuth/>}>
