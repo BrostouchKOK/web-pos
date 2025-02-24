@@ -24,6 +24,7 @@ const CategoryPage = () => {
     status: "",
     parentId: null,
   });
+  const [formRef] = Form.useForm();
 
   useEffect(() => {
     getList();
@@ -40,7 +41,9 @@ const CategoryPage = () => {
     setState({
       ...state,
       visibleModal: true,
-      id: data.id,
+    });
+    formRef.setFieldsValue({
+      id: data.id, // hidden id
       name: data.name,
       description: data.description,
       status: data.status,
@@ -48,11 +51,30 @@ const CategoryPage = () => {
   };
   // btn onClick Delete
   const onClickDelete = async (data, index) => {
-    const res = await request("category", "delete", {
-      id: data.id,
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const res = await request("category", "delete", {
+          id: data.id,
+        });
+
+        if (res && !res.error) {
+          Swal.fire("Deleted!", "Category has been deleted.", "success");
+          getList(); // Refresh the list after deletion
+        } else {
+          Swal.fire("Error!", "Failed to delete category.", "error");
+        }
+      }
     });
-    alert(JSON.stringify(res));
   };
+
   // Add Btn
   const onClickAddBtn = () => {
     setState({
@@ -62,6 +84,7 @@ const CategoryPage = () => {
   };
   // onCancel Btn
   const onCancelModal = () => {
+    formRef.resetFields();
     setState({
       ...state,
       visibleModal: false,
@@ -69,32 +92,6 @@ const CategoryPage = () => {
     });
   };
 
-
-  const onFinish = async (items) => {
-    var data = {
-      name: items.name,
-      description: items.description,
-      status: items.status,
-    };
-
-    try {
-      const res = await request("category", "post", data);
-
-      console.log("Response:", res); // Debugging log
-
-      if (res && !res.error) {
-        message.success(res.message || "Category added successfully!");
-        onCancelModal();
-      } else {
-        message.error(res.message || "Something went wrong!");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      message.error("Failed to add category.");
-    }
-  };
-
-  // onFinish Function
   // const onFinish = async (items) => {
   //   var data = {
   //     name: items.name,
@@ -104,35 +101,65 @@ const CategoryPage = () => {
 
   //   try {
   //     const res = await request("category", "post", data);
-  //     console.log("Response:", res); // Debugging
+
+  //     console.log("Response:", res); // Debugging log
 
   //     if (res && !res.error) {
-  //       Swal.fire({
-  //         icon: "success",
-  //         title: "Success!",
-  //         text: res.message || "Category saved successfully!",
-  //         timer: 2000,
-  //         showConfirmButton: false,
-  //       });
-
-  //       getList(); // Refresh the table after saving
+  //       message.success(res.message || "Category added successfully!");
   //       onCancelModal();
   //     } else {
-  //       Swal.fire({
-  //         icon: "error",
-  //         title: "Error!",
-  //         text: res?.message || "Failed to save category",
-  //       });
+  //       message.error(res.message || "Something went wrong!");
   //     }
   //   } catch (error) {
   //     console.error("Error:", error);
-  //     Swal.fire({
-  //       icon: "error",
-  //       title: "Error!",
-  //       text: "An error occurred while saving.",
-  //     });
+  //     message.error("Failed to add category.");
   //   }
   // };
+
+  //onFinish Function
+  const onFinish = async (items) => {
+    var data = {
+      id: formRef.getFieldValue("id"),
+      name: items.name,
+      description: items.description,
+      status: items.status,
+    };
+
+    try {
+      var method = "post";
+      if (formRef.getFieldValue("id")) {
+        // case update
+        method = "put";
+      }
+      const res = await request("category", method, data);
+
+      if (res && !res.error) {
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: res.message || "Category saved successfully!",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+
+        getList(); // Refresh the table after saving
+        onCancelModal();
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: res?.message || "Failed to save category",
+        });
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: "An error occurred while saving.",
+      });
+    }
+  };
 
   return (
     <div>
@@ -142,11 +169,13 @@ const CategoryPage = () => {
 
       <Modal
         open={state.visibleModal}
-        title={"New Category"}
+        title={
+          formRef.getFieldValue("id") ? "Edit Category" : "Create Category"
+        }
         footer={null}
         onCancel={onCancelModal}
       >
-        <Form layout="vertical" onFinish={onFinish}>
+        <Form layout="vertical" onFinish={onFinish} form={formRef}>
           <Form.Item label="Name" name={"name"}>
             <Input placeholder="Input category name" />
           </Form.Item>
@@ -171,7 +200,7 @@ const CategoryPage = () => {
           <Space className="mt-2">
             <Button onClick={onCancelModal}>Cancel</Button>
             <Button type="primary" htmlType="submit">
-              Save
+              {formRef.getFieldValue("id") ? "Update" : "Save"}
             </Button>
           </Space>
         </Form>
