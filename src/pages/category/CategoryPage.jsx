@@ -13,9 +13,11 @@ import {
 } from "antd";
 import { MdDelete, MdEdit } from "react-icons/md";
 import Swal from "sweetalert2";
+import MainPage from "../../components/layout/MainPage";
 
 const CategoryPage = () => {
   const [list, setList] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [state, setState] = useState({
     visibleModal: false,
     id: null,
@@ -29,14 +31,18 @@ const CategoryPage = () => {
   useEffect(() => {
     getList();
   }, []);
+
+  // GetList Function
   const getList = async () => {
     const res = await request("category", "get");
+    setLoading(true);
     if (res) {
+      setLoading(false);
       setList(res.list);
-      console.log(res.list);
+      // console.log(res.list);
     }
   };
-  // btn onClick Edit
+  // onClickEdit Function
   const onClickEdit = (data) => {
     setState({
       ...state,
@@ -49,7 +55,7 @@ const CategoryPage = () => {
       status: data.status,
     });
   };
-  // btn onClick Delete
+  // onClickDelete Function
   const onClickDelete = async (data, index) => {
     Swal.fire({
       title: "Are you sure?",
@@ -75,7 +81,7 @@ const CategoryPage = () => {
     });
   };
 
-  // Add Btn
+  // onClickAddBtn Function
   const onClickAddBtn = () => {
     setState({
       ...state,
@@ -92,31 +98,8 @@ const CategoryPage = () => {
     });
   };
 
-  // const onFinish = async (items) => {
-  //   var data = {
-  //     name: items.name,
-  //     description: items.description,
-  //     status: items.status,
-  //   };
-
-  //   try {
-  //     const res = await request("category", "post", data);
-
-  //     console.log("Response:", res); // Debugging log
-
-  //     if (res && !res.error) {
-  //       message.success(res.message || "Category added successfully!");
-  //       onCancelModal();
-  //     } else {
-  //       message.error(res.message || "Something went wrong!");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //     message.error("Failed to add category.");
-  //   }
-  // };
-
-  //onFinish Function
+ 
+  // onFinish Function
   const onFinish = async (items) => {
     var data = {
       id: formRef.getFieldValue("id"),
@@ -162,7 +145,7 @@ const CategoryPage = () => {
   };
 
   return (
-    <div>
+    <MainPage laoding={loading}>
       <Button type="primary" onClick={onClickAddBtn}>
         + New
       </Button>
@@ -260,7 +243,7 @@ const CategoryPage = () => {
           },
         ]}
       />
-    </div>
+    </MainPage>
   );
 };
 
