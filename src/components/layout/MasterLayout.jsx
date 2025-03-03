@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   DesktopOutlined,
   FileOutlined,
@@ -6,10 +6,11 @@ import {
   TeamOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Breadcrumb, Layout, Menu, theme } from "antd";
+import { Breadcrumb, Button, Layout, Menu, theme } from "antd";
 import { Outlet, useNavigate } from "react-router-dom";
 import cafeLogo from "../../assets/img/logos/cafe-logo.jpg";
 import messi from "../../assets/img/users/messi.jpg";
+import { getProfile, setAccessToken, setProfile } from "../../store/profile.store";
 const { Header, Content, Footer, Sider } = Layout;
 
 // onCickMenu function
@@ -158,14 +159,32 @@ const items = [
   },
 ];
 const MasterLayout = () => {
+  const profile = getProfile();
   const [collapsed, setCollapsed] = useState(false);
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
   const navigate = useNavigate();
+
+  useEffect(()=>{
+    if(!profile){
+      navigate("/login");
+    }
+  },[])
   const onClickMenu = (item) => {
     navigate(item.key);
   };
+  // onLogout Function
+  const onLogout = () => {
+    setAccessToken("");
+    setProfile("");
+    navigate("/login");
+  };
+  
+  if (!profile) {
+    return null;
+  }
+
   return (
     <Layout
       style={{
@@ -204,9 +223,10 @@ const MasterLayout = () => {
               </div>
             </div>
             <div className="d-flex align-items-center">
+              <div>{profile && <Button onClick={onLogout}>Logout</Button>}</div>
               <div className="mx-3 text-center">
-                <h5>Leonel Messi</h5>
-                <span className="fw-bold">Admin</span>
+                <h5>{profile?.name}</h5>
+                <span className="fw-bold">{profile.role_id}</span>
               </div>
               <img
                 src={messi}

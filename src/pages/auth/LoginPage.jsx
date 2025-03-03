@@ -19,6 +19,8 @@ const LoginPage = () => {
     const res = await request("auth/login", "post", params);
     if (res && !res.error) {
       setAccessToken(res.access_token);
+      // local storage cannot store object
+      // but can store string object
       setProfile(JSON.stringify(res.profile));
       navigate("/");
       
