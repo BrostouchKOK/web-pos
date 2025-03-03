@@ -3,14 +3,19 @@ import {
   DesktopOutlined,
   FileOutlined,
   PieChartOutlined,
+  SmileOutlined,
   TeamOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Breadcrumb, Button, Layout, Menu, theme } from "antd";
+import { Breadcrumb, Button, Dropdown, Layout, Menu, theme } from "antd";
 import { Outlet, useNavigate } from "react-router-dom";
 import cafeLogo from "../../assets/img/logos/cafe-logo.jpg";
 import messi from "../../assets/img/users/messi.jpg";
-import { getProfile, setAccessToken, setProfile } from "../../store/profile.store";
+import {
+  getProfile,
+  setAccessToken,
+  setProfile,
+} from "../../store/profile.store";
 const { Header, Content, Footer, Sider } = Layout;
 
 // onCickMenu function
@@ -166,11 +171,11 @@ const MasterLayout = () => {
   } = theme.useToken();
   const navigate = useNavigate();
 
-  useEffect(()=>{
-    if(!profile){
+  useEffect(() => {
+    if (!profile) {
       navigate("/login");
     }
-  },[])
+  }, []);
   const onClickMenu = (item) => {
     navigate(item.key);
   };
@@ -180,10 +185,42 @@ const MasterLayout = () => {
     setProfile("");
     navigate("/login");
   };
-  
+
   if (!profile) {
     return null;
   }
+
+  const itemsDrowdown = [
+    {
+      key: "1",
+      label: (
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://www.antgroup.com"
+        >Setting</a>
+      ),
+    },
+    {
+      key: "2",
+      label: (
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://www.aliyun.com"
+        >
+          Change Password
+        </a>
+      ),
+      icon: <SmileOutlined />,
+      // disabled: true,
+    },
+    {
+      key: "logout",
+      danger: true,
+      label: "Logout",
+    },
+  ];
 
   return (
     <Layout
@@ -223,17 +260,28 @@ const MasterLayout = () => {
               </div>
             </div>
             <div className="d-flex align-items-center">
-              <div>{profile && <Button onClick={onLogout}>Logout</Button>}</div>
+              {/* <div>{profile && <Button onClick={onLogout}>Logout</Button>}</div> */}
               <div className="mx-3 text-center">
                 <h5>{profile?.name}</h5>
-                <span className="fw-bold">{profile.role_id}</span>
+                <span className="fw-bold">{profile?.role_name}</span>
               </div>
-              <img
-                src={messi}
-                width={60}
-                height={60}
-                className="rounded-circle"
-              />
+              <Dropdown
+                menu={{
+                  items: itemsDrowdown,
+                  onClick : (e)=>{
+                    if(e.key == "logout"){
+                      onLogout();
+                    }
+                  }
+                }}
+              >
+                <img
+                  src={messi}
+                  width={60}
+                  height={60}
+                  className="rounded-circle cursor-pointer"
+                />
+              </Dropdown>
             </div>
           </div>
         </header>
