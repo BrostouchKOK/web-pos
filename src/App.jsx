@@ -8,6 +8,8 @@ import MasterLayout from "./components/layout/MasterLayout.jsx";
 import MasterLayoutAuth from "./components/layout/MasterLayoutAuth.jsx";
 import LoginPage from "./pages/auth/LoginPage.jsx";
 import RegisterPage from "./pages/auth/RegisterPage.jsx";
+import UserPage from "./pages/user/UserPage.jsx";
+import RolePage from "./pages/role/RolePage.jsx";
 
 
 const App = () => {
@@ -21,6 +23,8 @@ const App = () => {
             <Route path="product/category" element={<CategoryPage />} />
             <Route path="/employee" element={<EmployeePage />} />
             <Route path="/customer" element={<CostomerPage />} />
+            <Route path="/user" element={<UserPage />} />
+            <Route path="/role" element={<RolePage />} />
             <Route path="*" element={<h1>404-Page Not found</h1>} />
             
           </Route>

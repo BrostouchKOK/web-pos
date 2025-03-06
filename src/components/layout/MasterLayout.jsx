@@ -198,7 +198,9 @@ const MasterLayout = () => {
           target="_blank"
           rel="noopener noreferrer"
           href="https://www.antgroup.com"
-        >Setting</a>
+        >
+          Setting
+        </a>
       ),
     },
     {
@@ -268,11 +270,11 @@ const MasterLayout = () => {
               <Dropdown
                 menu={{
                   items: itemsDrowdown,
-                  onClick : (e)=>{
-                    if(e.key == "logout"){
+                  onClick: (e) => {
+                    if (e.key == "logout") {
                       onLogout();
                     }
-                  }
+                  },
                 }}
               >
                 <img

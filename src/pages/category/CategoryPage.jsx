@@ -98,7 +98,6 @@ const CategoryPage = () => {
     });
   };
 
- 
   // onFinish Function
   const onFinish = async (items) => {
     var data = {
@@ -226,6 +225,7 @@ const CategoryPage = () => {
           {
             key: "action",
             title: "Action",
+            align: "center",
             render: (item, data, index) => (
               <Space>
                 <Button
