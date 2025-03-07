@@ -11,12 +11,14 @@ const SupplierPage = () => {
     loading: false,
     list: [],
     visibleModal: false,
+    txtSearch: "",
   });
   useEffect(() => {
     getList();
   }, []);
   const getList = async () => {
-    const res = await request("supplier", "get");
+    //txtSearch = VN101 => we can call it query parameter
+    const res = await request(`supplier?txtSearch=${state.txtSearch}`, "get");
     try {
       if (res && !res.error) {
         setState((prev) => ({
@@ -47,7 +49,7 @@ const SupplierPage = () => {
   const handleOnFinish = async (items) => {
     // console.log(items);
     let data = {
-      id : form.getFieldValue("id"),
+      id: form.getFieldValue("id"),
       name: items.name,
       code: items.code,
       tel: items.tel,
@@ -55,11 +57,11 @@ const SupplierPage = () => {
       address: items.address,
       website: items.website,
     };
-    
+
     try {
       var method = "post";
-      if(form.getFieldValue("id")){
-        method = "put"
+      if (form.getFieldValue("id")) {
+        method = "put";
       }
       const res = await request("supplier", method, data);
       if (res && !res.error) {
@@ -114,22 +116,33 @@ const SupplierPage = () => {
     });
   };
   // handleEdit Function
-  const handleEdit = (data)=>{
-    setState((prev)=>({
+  const handleEdit = (data) => {
+    setState((prev) => ({
       ...prev,
-      visibleModal : true,
-    }))
+      visibleModal: true,
+    }));
     form.setFieldsValue({
-      id : data.id,
+      id: data.id,
       ...data,
-    })
-  }
+    });
+  };
   return (
     <MainPage laoding={false}>
       <div className="d-flex justify-content-between align-items-center w-100">
         <div className="d-flex justify-content-between">
           <h4>Supplier</h4>
-          <Input.Search className="mx-3" placeholder="search here..." />
+          <Input.Search
+            className="mx-3"
+            placeholder="search here..."
+            onChange={(value) =>
+              setState((prev) => ({
+                ...prev,
+                txtSearch: value.target.value,
+              }))
+            }
+            allowClear
+            onSearch={getList}
+          />
         </div>
         <div>
           <Button type="primary" onClick={HandleOpenModal}>
@@ -139,7 +152,9 @@ const SupplierPage = () => {
       </div>
 
       <Modal
-        title={form.getFieldValue("id")? "Update Supplier" : "Create New Supplier"}
+        title={
+          form.getFieldValue("id") ? "Update Supplier" : "Create New Supplier"
+        }
         open={state.visibleModal}
         footer={null}
         onCancel={HandleCloseModal}
@@ -167,7 +182,7 @@ const SupplierPage = () => {
             <Space>
               <Button onClick={HandleCloseModal}>Cancel</Button>
               <Button type="primary" htmlType="submit">
-                {form.getFieldValue("id")?"Update":"Save"}
+                {form.getFieldValue("id") ? "Update" : "Save"}
               </Button>
             </Space>
           </Form.Item>
@@ -223,7 +238,10 @@ const SupplierPage = () => {
             render: (item, data, index) => (
               <Space>
                 <Button type="primary">
-                  <MdEditSquare className="fs-6" onClick={()=>handleEdit(data)} />
+                  <MdEditSquare
+                    className="fs-6"
+                    onClick={() => handleEdit(data)}
+                  />
                 </Button>
                 <Button type="primary" danger>
                   <MdDelete
