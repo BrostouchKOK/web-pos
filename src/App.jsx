@@ -10,6 +10,7 @@ import LoginPage from "./pages/auth/LoginPage.jsx";
 import RegisterPage from "./pages/auth/RegisterPage.jsx";
 import UserPage from "./pages/user/UserPage.jsx";
 import RolePage from "./pages/role/RolePage.jsx";
+import SupplierPage from "./pages/supplier/SupplierPage.jsx";
 
 
 const App = () => {
@@ -25,6 +26,7 @@ const App = () => {
             <Route path="/customer" element={<CostomerPage />} />
             <Route path="/user" element={<UserPage />} />
             <Route path="/role" element={<RolePage />} />
+            <Route path="/supplier" element={<SupplierPage />} />
             <Route path="*" element={<h1>404-Page Not found</h1>} />
             
           </Route>
