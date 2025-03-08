@@ -11,6 +11,7 @@ import RegisterPage from "./pages/auth/RegisterPage.jsx";
 import UserPage from "./pages/user/UserPage.jsx";
 import RolePage from "./pages/role/RolePage.jsx";
 import SupplierPage from "./pages/supplier/SupplierPage.jsx";
+import ProductPage from "./pages/product/ProductPage.jsx";
 
 
 const App = () => {
@@ -27,6 +28,7 @@ const App = () => {
             <Route path="/user" element={<UserPage />} />
             <Route path="/role" element={<RolePage />} />
             <Route path="/supplier" element={<SupplierPage />} />
+            <Route path="/product" element={<ProductPage />} />
             <Route path="*" element={<h1>404-Page Not found</h1>} />
             
           </Route>

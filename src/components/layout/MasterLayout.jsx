@@ -16,6 +16,8 @@ import {
   setAccessToken,
   setProfile,
 } from "../../store/profile.store";
+import {configStore} from "../../store/configStore"
+import { request } from "../../utils/helper";
 const { Header, Content, Footer, Sider } = Layout;
 
 // onCickMenu function
@@ -164,6 +166,7 @@ const items = [
   },
 ];
 const MasterLayout = () => {
+  const {setConfig} =  configStore();
   const profile = getProfile();
   const [collapsed, setCollapsed] = useState(false);
   const {
@@ -175,6 +178,7 @@ const MasterLayout = () => {
     if (!profile) {
       navigate("/login");
     }
+    getConfig();
   }, []);
   const onClickMenu = (item) => {
     navigate(item.key);
@@ -223,6 +227,13 @@ const MasterLayout = () => {
       label: "Logout",
     },
   ];
+
+  const getConfig = async () => {
+    const res = await request("config", "get");
+    if (res) {
+      setConfig(res);
+    }
+  };
 
   return (
     <Layout

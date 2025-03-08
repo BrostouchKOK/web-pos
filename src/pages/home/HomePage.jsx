@@ -1,25 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { request } from "../../utils/helper";
 import HomeGrid from "../../components/home/HomeGrid";
-import { create } from "zustand";
 import { Button } from "antd";
-
-const countStore = create((set) => ({
-  count: 1,
-  increase: () =>
-    set((state) => ({
-      count: state.count + 1,
-    })),
-  decrease: () =>
-    set((state) => ({
-      count: state.count - 1,
-    })),
-}));
+import { configStore } from "../../store/configStore";
 
 const HomePage = () => {
-  const { count, increase, decrease } = countStore();
+  const { config } = configStore();
   const [home, setHome] = useState([]);
-
   useEffect(() => {
     getList();
   }, []);
@@ -31,11 +18,22 @@ const HomePage = () => {
     }
   };
 
+  // const onGetConfig = async () => {
+  //   const res = await request("config", "get");
+  //   if (res) {
+  //     setConfig(res);
+  //   }
+  // };
+
   return (
     <div className="container mt-4">
-      <h1>{count}</h1>
-      <Button onClick={() => increase()}>+</Button>
-      <Button onClick={() => (count > 0 ? decrease() : count)}>-</Button>
+      <div>
+        {config?.role &&
+          config.role?.map((item, index) => (
+            <div key={index}>{item.name}</div>
+          ))}
+      </div>
+
       <div className="row">
         {home.map((item, index) => (
           <div key={index} className="col-lg-3 col-md-4 col-sm-6 mb-4 rounded">

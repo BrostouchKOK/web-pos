@@ -4,6 +4,7 @@ import MainPage from "../../components/layout/MainPage";
 import { Button, Form, Input, Modal, Space, Table } from "antd";
 import { MdDelete, MdEditSquare } from "react-icons/md";
 import Swal from "sweetalert2";
+import dayjs from "dayjs";
 
 const SupplierPage = () => {
   const [form] = Form.useForm();
@@ -17,6 +18,12 @@ const SupplierPage = () => {
     getList();
   }, []);
   const getList = async () => {
+    const res_config = await request("config","get");
+    console.log(res_config)
+    setState((prev)=>({
+      ...prev,
+      loading : true,
+    }))
     //txtSearch = VN101 => we can call it query parameter
     const res = await request(`supplier?txtSearch=${state.txtSearch}`, "get");
     try {
@@ -24,6 +31,7 @@ const SupplierPage = () => {
         setState((prev) => ({
           ...prev,
           list: res.list,
+          loading : false,
         }));
       }
     } catch (error) {}
@@ -127,7 +135,8 @@ const SupplierPage = () => {
     });
   };
   return (
-    <MainPage laoding={false}>
+    <MainPage laoding={state.loading}>
+      <h1>{dayjs().format("DD-MMM-YYYY h:mm A")}</h1>
       <div className="d-flex justify-content-between align-items-center w-100">
         <div className="d-flex justify-content-between">
           <h4>Supplier</h4>
@@ -231,6 +240,7 @@ const SupplierPage = () => {
             key: "create_at",
             title: "create_at",
             dataIndex: "create_at",
+            render : (value) => dayjs(value).format("DD-MMM-YYYY h:mm A"),
           },
           {
             key: "action",
