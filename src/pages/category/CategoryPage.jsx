@@ -56,7 +56,7 @@ const CategoryPage = () => {
     });
   };
   // onClickDelete Function
-  const   onClickDelete = async (data, index) => {
+  const onClickDelete = async (data, index) => {
     Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -145,9 +145,21 @@ const CategoryPage = () => {
 
   return (
     <MainPage laoding={loading}>
-      <Button type="primary" onClick={onClickAddBtn}>
-        + New
-      </Button>
+      <div className="d-flex justify-content-between align-items-center w-100">
+        <div className="d-flex justify-content-between align-items-center ">
+          <h5>Category</h5>
+          <Input.Search
+            className="mx-3"
+            allowClear
+            placeholder="search here..."
+          />
+        </div>
+        <div>
+          <Button type="primary" onClick={onClickAddBtn}>
+            + New
+          </Button>
+        </div>
+      </div>
 
       <Modal
         open={state.visibleModal}
