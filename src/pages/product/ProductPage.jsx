@@ -50,11 +50,15 @@ const ProductPage = () => {
   }, []);
 
   // handleNewBtn Functioin
-  const handleNewBtn = () => {
+  const handleNewBtn = async () => {
     setState((prev) => ({
       ...prev,
       visibleModal: true,
     }));
+    const res = await request("new_barcode", "post");
+    if (res && !res.error) {
+      form.setFieldValue("barcode", res.barcode);
+    }
   };
   // handleCloseModal Function
   const handleCloseModal = () => {
@@ -62,10 +66,60 @@ const ProductPage = () => {
       ...prev,
       visibleModal: false,
     }));
+    form.resetFields();
   };
   // onFinish Function
-  const onFinish = (items) => {
+  const onFinish = async (items) => {
     console.log(items);
+
+    // Create form data
+    const params = new FormData();
+    params.append("name", items.name);
+    params.append("category_id", items.category_id);
+    params.append("barcode", items.barcode);
+    params.append("brand", items.brand);
+    params.append("description", items.description);
+    params.append("qty", items.qty);
+    params.append("price", items.price);
+    params.append("discount", items.discount);
+    params.append("status", items.status);
+
+    if (items.image_default) {
+      params.append(
+        "image-upload",
+        items.image_default.file.originFileObj,
+        items.image_default.file.name
+      );
+    }
+
+    try {
+      const res = await request("product", "post", params);
+      if (res && !res.error) {
+        Swal.fire({
+          title: "Success!",
+          text: "Product added successfully!",
+          icon: "success",
+          showConfirmButton :false,
+          timer : 2000,
+        }).then(() => {
+          handleCloseModal();
+        });
+      } else {
+        Swal.fire({
+          icon : "error",
+          text : res.error.barcode,
+          title : "Error!",
+          confirmButtonText: "Try Again"
+        })
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "Error!",
+        text: error.message,
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
   };
 
   const handlePreview = async (file) => {
@@ -154,6 +208,9 @@ const ProductPage = () => {
                   allowClear
                   options={config?.brand}
                 />
+              </Form.Item>
+              <Form.Item label="Bacode" name={"barcode"}>
+                <Input disabled placeholder="barcode" />
               </Form.Item>
               <Form.Item
                 label="Quantity"
