@@ -20,6 +20,7 @@ import { MdDelete, MdEdit } from "react-icons/md";
 import Swal from "sweetalert2";
 import MainPage from "../../components/layout/MainPage";
 import { configStore } from "../../store/configStore";
+import image_placeholder from "../../assets/image_placeholder.png";
 
 const getBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -33,11 +34,7 @@ const ProductPage = () => {
   const { config } = configStore();
   const [state, setState] = useState({
     visibleModal: false,
-    id: null,
-    name: "",
-    description: "",
-    status: "",
-    parentId: null,
+    list: [],
   });
   const [form] = Form.useForm();
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -46,8 +43,20 @@ const ProductPage = () => {
   const [imageOptional, setImageOptional] = useState([]);
 
   useEffect(() => {
-    // getList();
+    getList();
   }, []);
+
+  // getList Fucntion
+  const getList = async () => {
+    var param = {};
+    const res = await request("product", "get", param);
+    if (res && !res.error) {
+      setState((prev) => ({
+        ...prev,
+        list: res.list,
+      }));
+    }
+  };
 
   // handleNewBtn Functioin
   const handleNewBtn = async () => {
@@ -99,18 +108,18 @@ const ProductPage = () => {
           title: "Success!",
           text: "Product added successfully!",
           icon: "success",
-          showConfirmButton :false,
-          timer : 2000,
+          showConfirmButton: false,
+          timer: 2000,
         }).then(() => {
           handleCloseModal();
         });
       } else {
         Swal.fire({
-          icon : "error",
-          text : res.error.barcode,
-          title : "Error!",
-          confirmButtonText: "Try Again"
-        })
+          icon: "error",
+          text: res.error.barcode,
+          title: "Error!",
+          confirmButtonText: "Try Again",
+        });
       }
     } catch (error) {
       Swal.fire({
@@ -342,29 +351,49 @@ const ProductPage = () => {
           </div>
         </Form>
       </Modal>
-      {/* <Table
+      <Table
         className="mt-2"
-        dataSource={list}
+        dataSource={state.list}
         columns={[
-          {
-            key: "No",
-            title: "No",
-            render: (item, data, index) => index + 1,
-          },
-          {
-            key: "id",
-            title: "Id",
-            dataIndex: "id",
-          },
           {
             key: "name",
             title: "Name",
             dataIndex: "name",
           },
           {
+            key: "barcode",
+            title: "Barcode",
+            dataIndex: "barcode",
+          },
+          {
             key: "description",
             title: "Description",
             dataIndex: "description",
+          },
+          {
+            key: "category_name",
+            title: "Category Name",
+            dataIndex: "category_name",
+          },
+          {
+            key: "brand",
+            title: "Brand",
+            dataIndex: "brand",
+          },
+          {
+            key: "price",
+            title: "Price",
+            dataIndex: "price",
+          },
+          {
+            key: "qty",
+            title: "Qty",
+            dataIndex: "qty",
+          },
+          {
+            key: "discount",
+            title: "Discount",
+            dataIndex: "discount",
           },
           {
             key: "status",
@@ -376,6 +405,23 @@ const ProductPage = () => {
               ) : (
                 <Tag color="red">InActive</Tag>
               ),
+          },
+          {
+            key: "image",
+            title: "Image",
+            dataIndex: "image",
+            // render: (value) =>
+            //   "http://localhost/full_stack/POS_Phone_Shop_Images/" + value,
+            render: (value) => value? (
+              <Image
+                src={
+                  "http://localhost/full_stack/POS_Phone_Shop_Images/" + value
+                }
+                style={{ width: 40 }}
+              />
+            ): <div className="bg-secondary">
+              <Image src={image_placeholder} style={{width : 40}}/>
+            </div>
           },
           {
             key: "action",
@@ -397,7 +443,7 @@ const ProductPage = () => {
             ),
           },
         ]}
-      /> */}
+      />
     </MainPage>
   );
 };
