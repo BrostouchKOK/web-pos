@@ -161,6 +161,31 @@ const ProductPage = () => {
     getList();
   };
 
+  // handleDelete Functon
+  const handleDelete = async (data) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (resutl) => {
+      if (resutl.isConfirmed) {
+        const res = await request("product", "delete", {
+          id: data.id,
+        });
+        if (res && !res.error) {
+          Swal.fire("Deleted!", "Product has been deleted.", "success");
+          getList(); // Refresh the list after deletion
+        } else {
+          Swal.fire("Error!", "Failed to delete product.", "error");
+        }
+      }
+    });
+  };
+
   return (
     <MainPage laoding={false}>
       <div className="d-flex justify-content-between align-items-center w-100">
@@ -473,11 +498,11 @@ const ProductPage = () => {
                 <Button
                   type="primary"
                   danger
-                  onClick={() => onClickDelete(data)}
+                  onClick={() => handleDelete(data)}
                 >
                   <MdDelete className="fs-5" />
                 </Button>
-                <Button type="primary" onClick={() => onClickEdit(data)}>
+                <Button type="primary" onClick={() => handleEdit(data)}>
                   <MdEdit className="fs-5" />
                 </Button>
               </Space>
