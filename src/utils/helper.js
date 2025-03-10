@@ -3,7 +3,7 @@ import { Config } from "./config";
 import { setServerStatus } from "../store/service.store";
 import { getAccessToken } from "../store/profile.store";
 
-export const request = (url = "", method = "get", data) => {
+export const request = (url = "", method = "get", data={}) => {
   console.log("access_token", getAccessToken());
   var access_token = getAccessToken();
   // in react
@@ -12,8 +12,16 @@ export const request = (url = "", method = "get", data) => {
     // check if param data is FormData
     headers = { "Content-Type": "multipart/form-data" };
   }
+  var param_query = "?";
+  if (method == "get" && data instanceof Object) {
+    Object.keys(data).map((key, index) => {
+      if (data[key] != "" && data[key] != null) {
+        param_query += "&" + key + "=" + data[key];
+      }
+    });
+  }
   return axios({
-    url: Config.base_url + url,
+    url: Config.base_url + url + param_query,
     method: method,
     data: data,
     headers: {

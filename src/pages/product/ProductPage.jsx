@@ -36,6 +36,12 @@ const ProductPage = () => {
     visibleModal: false,
     list: [],
   });
+  const [filter, setFilter] = useState({
+    txt_search: "",
+    category_id: "",
+    brand: "",
+  });
+
   const [form] = Form.useForm();
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
@@ -48,7 +54,14 @@ const ProductPage = () => {
 
   // getList Fucntion
   const getList = async () => {
-    var param = {};
+    var param = {
+      // text_search : filter.text_search,
+      // category_id : filter.category_id,
+      // brand : filter.brand,
+
+      // sorthand
+      ...filter,
+    };
     const res = await request("product", "get", param);
     if (res && !res.error) {
       setState((prev) => ({
@@ -143,6 +156,11 @@ const ProductPage = () => {
   const handleChangeImageOptional = ({ fileList: newFileList }) =>
     setImageOptional(newFileList);
 
+  // handleFilter Function
+  const handleFilter = () => {
+    getList();
+  };
+
   return (
     <MainPage laoding={false}>
       <div className="d-flex justify-content-between align-items-center w-100">
@@ -152,6 +170,12 @@ const ProductPage = () => {
             className="mx-3 w-auto"
             allowClear
             placeholder="search here..."
+            onChange={(event) =>
+              setFilter((prev) => ({
+                ...prev,
+                txt_search: event.target.value,
+              }))
+            }
           />
           <Select
             placeholder="Select category"
@@ -161,6 +185,12 @@ const ProductPage = () => {
               label: items.name,
               value: items.id,
             }))}
+            onChange={(id) =>
+              setFilter((prev) => ({
+                ...prev,
+                category_id: id,
+              }))
+            }
           />
           <Select
             placeholder="Select brand"
@@ -170,8 +200,16 @@ const ProductPage = () => {
               label: items.label,
               value: items.value,
             }))}
+            onChange={(id) =>
+              setFilter((prev) => ({
+                ...prev,
+                brand: id,
+              }))
+            }
           />
-          <Button type="primary">Filter</Button>
+          <Button type="primary" onClick={handleFilter}>
+            Filter
+          </Button>
         </div>
         <div>
           <Button type="primary" onClick={handleNewBtn}>
@@ -412,16 +450,19 @@ const ProductPage = () => {
             dataIndex: "image",
             // render: (value) =>
             //   "http://localhost/full_stack/POS_Phone_Shop_Images/" + value,
-            render: (value) => value? (
-              <Image
-                src={
-                  "http://localhost/full_stack/POS_Phone_Shop_Images/" + value
-                }
-                style={{ width: 40 }}
-              />
-            ): <div className="bg-secondary">
-              <Image src={image_placeholder} style={{width : 40}}/>
-            </div>
+            render: (value) =>
+              value ? (
+                <Image
+                  src={
+                    "http://localhost/full_stack/POS_Phone_Shop_Images/" + value
+                  }
+                  style={{ width: 40 }}
+                />
+              ) : (
+                <div className="bg-secondary">
+                  <Image src={image_placeholder} style={{ width: 40 }} />
+                </div>
+              ),
           },
           {
             key: "action",
