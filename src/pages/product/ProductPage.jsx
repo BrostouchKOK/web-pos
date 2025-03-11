@@ -88,6 +88,7 @@ const ProductPage = () => {
       ...prev,
       visibleModal: false,
     }));
+    setImageDefault([]);
     form.resetFields();
   };
   // onFinish Function
@@ -106,26 +107,41 @@ const ProductPage = () => {
     params.append("discount", items.discount);
     params.append("status", items.status);
 
+    // when update use this two keys
+    params.append("image", form.getFieldValue("image")); // just name image
+    params.append("id", form.getFieldValue("id"));
+    //
+
     if (items.image_default) {
-      params.append(
-        "image-upload",
-        items.image_default.file.originFileObj,
-        items.image_default.file.name
-      );
+      if (items.image_default.file.status === "removed") {
+        params.append("image_remove", "1");
+      } else {
+        params.append(
+          "image-upload",
+          items.image_default.file.originFileObj,
+          items.image_default.file.name
+        );
+      }
     }
 
     try {
-      const res = await request("product", "post", params);
+      var method = "post";
+      if (form.getFieldValue("id")) {
+        method = "put";
+      }
+      const res = await request("product", method, params);
       if (res && !res.error) {
         Swal.fire({
           title: "Success!",
-          text: "Product added successfully!",
+          text: res.message || "Product added successfully!",
           icon: "success",
           showConfirmButton: false,
           timer: 2000,
-        }).then(() => {
-          handleCloseModal();
         });
+        setImageDefault([]); // Reset imageDefault
+        setImageOptional([]); // Reset imageOptional
+        handleCloseModal();
+        getList();
       } else {
         Swal.fire({
           icon: "error",
@@ -162,7 +178,7 @@ const ProductPage = () => {
   };
 
   // handleDelete Functon
-  const handleDelete = async (data) => {
+  const handleDelete = async (data, index) => {
     Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -184,6 +200,30 @@ const ProductPage = () => {
         }
       }
     });
+  };
+
+  // handleEdit Function
+  const handleEdit = (data, index) => {
+    setState((prev) => ({
+      ...prev,
+      visibleModal: true,
+    }));
+    form.setFieldsValue({
+      id: data.id,
+      ...data,
+    });
+    if (data.image != "" && data.image != null) {
+      const imageProduct = [
+        {
+          uid: "-1",
+          name: data.image,
+          status: "done",
+          url:
+            "http://localhost/full_stack/POS_Phone_Shop_Images/" + data.image,
+        },
+      ];
+      setImageDefault(imageProduct);
+    }
   };
 
   return (
@@ -299,11 +339,8 @@ const ProductPage = () => {
                   placeholder="Input product qty"
                 />
               </Form.Item>
-              <Form.Item label="Product discount" name={"discount"}>
-                <InputNumber
-                  className="w-100"
-                  placeholder="Input product discount"
-                />
+              <Form.Item label="Desctiption" name={"description"}>
+                <Input.TextArea placeholder="Input category description" />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -357,8 +394,11 @@ const ProductPage = () => {
                   ]}
                 />
               </Form.Item>
-              <Form.Item label="Desctiption" name={"description"}>
-                <Input.TextArea placeholder="Input category description" />
+              <Form.Item label="Product discount" name={"discount"}>
+                <InputNumber
+                  className="w-100"
+                  placeholder="Input product discount"
+                />
               </Form.Item>
             </Col>
           </Row>
@@ -368,6 +408,7 @@ const ProductPage = () => {
               customRequest={(options) => {
                 options.onSuccess();
               }}
+              maxCount={1}
               listType="picture-card"
               fileList={imageDefault}
               onPreview={handlePreview}
