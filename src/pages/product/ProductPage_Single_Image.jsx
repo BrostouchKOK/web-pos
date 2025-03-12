@@ -81,13 +81,6 @@ const ProductPage = () => {
     if (res && !res.error) {
       form.setFieldValue("barcode", res.barcode);
     }
-    // form.setFieldsValue({
-    //   name : "Apple 001",
-    //   category_id : 1,
-    //   brand : "Apple",
-    //   price : 1000,
-    //   qty : 10,
-    // })
   };
   // handleCloseModal Function
   const handleCloseModal = () => {
@@ -96,7 +89,6 @@ const ProductPage = () => {
       visibleModal: false,
     }));
     setImageDefault([]);
-    setImageOptional([]);
     form.resetFields();
   };
   // onFinish Function
@@ -125,23 +117,13 @@ const ProductPage = () => {
         params.append("image_remove", "1");
       } else {
         params.append(
-          "image_upload",
+          "image-upload",
           items.image_default.file.originFileObj,
           items.image_default.file.name
         );
       }
     }
-    if(items.image_optional){
-      // console.log(items.image_optional);
-      items.image_optional.fileList.map((item,index)=>{
-        // multiple image
-        params.append(
-          "image_upload_optoinal",
-          item.originFileObj,
-          item.name,
-        )
-      })
-    }
+
     try {
       var method = "post";
       if (form.getFieldValue("id")) {
