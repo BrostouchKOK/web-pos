@@ -15,7 +15,7 @@ import { MdDelete, MdEdit } from "react-icons/md";
 import Swal from "sweetalert2";
 import MainPage from "../../components/layout/MainPage";
 
-const CategoryPage = () => {
+const CustomerPage = () => {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [state, setState] = useState({
@@ -25,6 +25,7 @@ const CategoryPage = () => {
     description: "",
     status: "",
     parentId: null,
+    txtSearch : "",
   });
   const [formRef] = Form.useForm();
 
@@ -34,7 +35,11 @@ const CategoryPage = () => {
 
   // GetList Function
   const getList = async () => {
-    const res = await request("category", "get");
+    var param = {
+      txtSearch : state.txtSearch
+    }
+    const res = await request("customer", "get",param);
+    // alert(JSON.stringify(res));
     setLoading(true);
     if (res) {
       setLoading(false);
@@ -50,9 +55,7 @@ const CategoryPage = () => {
     });
     formRef.setFieldsValue({
       id: data.id, // hidden id
-      name: data.name,
-      description: data.description,
-      status: data.status,
+      ...data
     });
   };
   // onClickDelete Function
@@ -67,15 +70,17 @@ const CategoryPage = () => {
       confirmButtonText: "Yes, delete it!",
     }).then(async (result) => {
       if (result.isConfirmed) {
-        const res = await request("category", "delete", {
+        const res = await request("customer", "delete", {
+          
           id: data.id,
         });
+        // alert(JSON.stringify(res));
 
         if (res && !res.error) {
-          Swal.fire("Deleted!", "Category has been deleted.", "success");
+          Swal.fire("Deleted!", res.message || "customer has been deleted.", "success");
           getList(); // Refresh the list after deletion
         } else {
-          Swal.fire("Error!", "Failed to delete category.", "error");
+          Swal.fire("Error!", "Failed to delete customer.", "error");
         }
       }
     });
@@ -102,9 +107,7 @@ const CategoryPage = () => {
   const onFinish = async (items) => {
     var data = {
       id: formRef.getFieldValue("id"),
-      name: items.name,
-      description: items.description,
-      status: items.status,
+      ...items,
     };
 
     try {
@@ -113,13 +116,13 @@ const CategoryPage = () => {
         // case update
         method = "put";
       }
-      const res = await request("category", method, data);
+      const res = await request("customer", method, data);
 
       if (res && !res.error) {
         Swal.fire({
           icon: "success",
           title: "Success!",
-          text: res.message || "Category saved successfully!",
+          text: res.message || "customer saved successfully!",
           timer: 2000,
           showConfirmButton: false,
         });
@@ -130,7 +133,7 @@ const CategoryPage = () => {
         Swal.fire({
           icon: "error",
           title: "Error!",
-          text: res?.message || "Failed to save category",
+          text: res?.message || "Failed to save customer",
         });
       }
     } catch (error) {
@@ -147,12 +150,18 @@ const CategoryPage = () => {
     <MainPage laoding={loading}>
       <div className="d-flex justify-content-between align-items-center w-100">
         <div className="d-flex w-100">
-          <h5>Category List</h5>
+          <h5>Customer List</h5>
           <Input.Search
             className="mx-3 w-auto"
             allowClear
             placeholder="search here..."
+            onChange={(e)=>setState((prev)=>({
+              ...prev,
+              txtSearch : e.target.value,
+            }))}
+            onSearch={getList}
           />
+          <Button type="primary" onClick={getList}>Filter</Button>
         </div>
         <div>
           <Button type="primary" onClick={onClickAddBtn}>
@@ -164,32 +173,26 @@ const CategoryPage = () => {
       <Modal
         open={state.visibleModal}
         title={
-          formRef.getFieldValue("id") ? "Edit Category" : "Create Category"
+          formRef.getFieldValue("id") ? "Edit customer" : "Create customer"
         }
         footer={null}
         onCancel={onCancelModal}
       >
         <Form layout="vertical" onFinish={onFinish} form={formRef}>
           <Form.Item label="Name" name={"name"}>
-            <Input placeholder="Input category name" />
+            <Input placeholder="Input customer name" />
           </Form.Item>
-          <Form.Item label="Desctiption" name={"description"}>
-            <Input.TextArea placeholder="Input category description" />
+          <Form.Item label="Telephone" name={"tel"}>
+            <Input placeholder="Input customer telephone" />
           </Form.Item>
-          <Form.Item label="Status" name={"status"}>
-            <Select
-              placeholder="Select status"
-              options={[
-                {
-                  label: "Avtive",
-                  value: 1,
-                },
-                {
-                  label: "Inactive",
-                  value: 0,
-                },
-              ]}
-            />
+          <Form.Item label="Email" name={"email"}>
+            <Input placeholder="Input customer email" />
+          </Form.Item>
+          <Form.Item label="Address" name={"address"}>
+            <Input placeholder="Input customer address" />
+          </Form.Item>
+          <Form.Item label="Type" name={"type"}>
+            <Input placeholder="Input customer type" />
           </Form.Item>
           <Space className="mt-2">
             <Button onClick={onCancelModal}>Cancel</Button>
@@ -209,30 +212,34 @@ const CategoryPage = () => {
             render: (item, data, index) => index + 1,
           },
           {
-            key: "id",
-            title: "Id",
-            dataIndex: "id",
-          },
-          {
             key: "name",
             title: "Name",
             dataIndex: "name",
           },
           {
-            key: "description",
-            title: "Description",
-            dataIndex: "description",
+            key: "tel",
+            title: "Telephone",
+            dataIndex: "tel",
           },
           {
-            key: "status",
-            title: "Status",
-            dataIndex: "status",
-            render: (status) =>
-              status ? (
-                <Tag color="green">Active</Tag>
-              ) : (
-                <Tag color="red">InActive</Tag>
-              ),
+            key: "email",
+            title: "Email",
+            dataIndex: "email",
+          },
+          {
+            key: "address",
+            title: "address",
+            dataIndex: "address",
+          },
+          {
+            key: "type",
+            title: "Type",
+            dataIndex: "type",
+          },
+          {
+            key: "create_by",
+            title: "Create By",
+            dataIndex: "create_by",
           },
           {
             key: "action",
@@ -259,4 +266,4 @@ const CategoryPage = () => {
   );
 };
 
-export default CategoryPage;
+export default CustomerPage;

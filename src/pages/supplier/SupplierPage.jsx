@@ -25,7 +25,10 @@ const SupplierPage = () => {
       loading : true,
     }))
     //txtSearch = VN101 => we can call it query parameter
-    const res = await request(`supplier?txtSearch=${state.txtSearch}`, "get");
+    var param = {
+      txtSearch : state.txtSearch,
+    }
+    const res = await request(`supplier`, "get",param);
     try {
       if (res && !res.error) {
         setState((prev) => ({

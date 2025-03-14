@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/home/HomePage.jsx";
 import CategoryPage from "./pages/category/CategoryPage";
 import EmployeePage from "./pages/employee/EmployeePage";
-import CostomerPage from "./pages/costomer/CostomerPage.jsx";
+import CustomerPage from "./pages/costomer/CustomerPage.jsx";
 import MasterLayout from "./components/layout/MasterLayout.jsx";
 import MasterLayoutAuth from "./components/layout/MasterLayoutAuth.jsx";
 import LoginPage from "./pages/auth/LoginPage.jsx";
@@ -24,7 +24,7 @@ const App = () => {
             <Route path="/" element={<HomePage />} />
             <Route path="product/category" element={<CategoryPage />} />
             <Route path="/employee" element={<EmployeePage />} />
-            <Route path="/customer" element={<CostomerPage />} />
+            <Route path="/customer" element={<CustomerPage />} />
             <Route path="/user" element={<UserPage />} />
             <Route path="/role" element={<RolePage />} />
             <Route path="/supplier" element={<SupplierPage />} />
