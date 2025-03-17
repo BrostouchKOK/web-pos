@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { formatDateClient, request } from "../../utils/helper";
+import { request } from "../../utils/helper";
 import {
   Button,
   Form,
@@ -15,7 +15,7 @@ import { MdDelete, MdEdit } from "react-icons/md";
 import Swal from "sweetalert2";
 import MainPage from "../../components/layout/MainPage";
 
-const EmployeePage = () => {
+const ExpanseTypePage = () => {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [state, setState] = useState({
@@ -38,7 +38,7 @@ const EmployeePage = () => {
     var param = {
       txtSearch : state.txtSearch
     }
-    const res = await request("employee", "get",param);
+    const res = await request("expanse_type", "get",param);
     // alert(JSON.stringify(res));
     setLoading(true);
     if (res) {
@@ -70,17 +70,17 @@ const EmployeePage = () => {
       confirmButtonText: "Yes, delete it!",
     }).then(async (result) => {
       if (result.isConfirmed) {
-        const res = await request("employee", "delete", {
+        const res = await request("expense_type", "delete", {
           
           id: data.id,
         });
         // alert(JSON.stringify(res));
 
         if (res && !res.error) {
-          Swal.fire("Deleted!", res.message || "employee has been deleted.", "success");
+          Swal.fire("Deleted!", res.message || "expense_type has been deleted.", "success");
           getList(); // Refresh the list after deletion
         } else {
-          Swal.fire("Error!", "Failed to delete employee.", "error");
+          Swal.fire("Error!", "Failed to delete expense_type.", "error");
         }
       }
     });
@@ -116,13 +116,13 @@ const EmployeePage = () => {
         // case update
         method = "put";
       }
-      const res = await request("employee", method, data);
+      const res = await request("expense_type", method, data);
 
       if (res && !res.error) {
         Swal.fire({
           icon: "success",
           title: "Success!",
-          text: res.message || "employee saved successfully!",
+          text: res.message || "expense_type saved successfully!",
           timer: 2000,
           showConfirmButton: false,
         });
@@ -133,7 +133,7 @@ const EmployeePage = () => {
         Swal.fire({
           icon: "error",
           title: "Error!",
-          text: res?.message || "Failed to save employee",
+          text: res?.message || "Failed to save expense_type",
         });
       }
     } catch (error) {
@@ -150,7 +150,7 @@ const EmployeePage = () => {
     <MainPage laoding={loading}>
       <div className="d-flex justify-content-between align-items-center w-100">
         <div className="d-flex w-100">
-          <h5>Employee List</h5>
+          <h5>expense_type List</h5>
           <Input.Search
             className="mx-3 w-auto"
             allowClear
@@ -173,45 +173,19 @@ const EmployeePage = () => {
       <Modal
         open={state.visibleModal}
         title={
-          formRef.getFieldValue("id") ? "Edit Employee" : "Create Employee"
+          formRef.getFieldValue("id") ? "Edit expense_type" : "Create expense_type"
         }
         footer={null}
         onCancel={onCancelModal}
       >
         <Form layout="vertical" onFinish={onFinish} form={formRef}>
-          <Form.Item label="Firstname" name={"firstname"}>
-            <Input placeholder="firstname" />
+          <Form.Item label="Name" name={"name"}>
+            <Input placeholder="Input expense_type name" />
           </Form.Item>
-          <Form.Item label="Lastname" name={"lastname"}>
-            <Input placeholder="lastname" />
+          <Form.Item label="Code" name={"code"}>
+            <Input placeholder="Input code" />
           </Form.Item>
-          <Form.Item label="Gender" name={"gender"}>
-            <Select
-              placeholder = "Select gender"
-              options={[
-                {
-                  label : "Male",
-                  value : 1,
-                },
-                {
-                  label : "Female",
-                  value : 0,
-                }
-              ]}
-            />
-          </Form.Item>
-          <Form.Item label="Telephone" name={"tel"}>
-            <Input placeholder="Input employee telephone" />
-          </Form.Item>
-          <Form.Item label="Email" name={"email"}>
-            <Input placeholder="Input employee email" />
-          </Form.Item>
-          <Form.Item label="Address" name={"address"}>
-            <Input placeholder="address" />
-          </Form.Item>
-          <Form.Item label="position" name={"position"}>
-            <Input placeholder="position" />
-          </Form.Item>
+          
           <Space className="mt-2">
             <Button onClick={onCancelModal}>Cancel</Button>
             <Button type="primary" htmlType="submit">
@@ -230,46 +204,14 @@ const EmployeePage = () => {
             render: (item, data, index) => index + 1,
           },
           {
-            key: "firstname",
-            title: "firstname",
-            dataIndex: "firstname",
+            key: "name",
+            title: "Name",
+            dataIndex: "name",
           },
           {
-            key: "lastname",
-            title: "lastname",
-            dataIndex: "lastname",
-          },
-          {
-            key: "gender",
-            title: "gender",
-            dataIndex: "gender",
-            render : (value) => value? "Male":"Female",
-          },
-          {
-            key: "tel",
-            title: "Tel",
-            dataIndex: "tel",
-          },
-          {
-            key: "email",
-            title: "Email",
-            dataIndex: "email",
-          },
-          {
-            key: "address",
-            title: "address",
-            dataIndex: "address",
-          },
-          {
-            key: "position",
-            title: "position",
-            dataIndex: "position",
-          },
-          {
-            key: "create_at",
-            title: "Create at",
-            dataIndex: "create_at",
-            render : (value) => formatDateClient(value),
+            key: "code",
+            title: "code",
+            dataIndex: "code",
           },
           {
             key: "action",
@@ -278,15 +220,14 @@ const EmployeePage = () => {
             render: (item, data, index) => (
               <Space>
                 <Button
-                  className="p-2"
                   type="primary"
                   danger
                   onClick={() => onClickDelete(data)}
                 >
-                  <MdDelete className="fs-6" />
+                  <MdDelete className="fs-5" />
                 </Button>
-                <Button className="p-2" type="primary" onClick={() => onClickEdit(data)}>
-                  <MdEdit className="fs-6" />
+                <Button type="primary" onClick={() => onClickEdit(data)}>
+                  <MdEdit className="fs-5" />
                 </Button>
               </Space>
             ),
@@ -297,4 +238,4 @@ const EmployeePage = () => {
   );
 };
 
-export default EmployeePage;
+export default ExpanseTypePage;

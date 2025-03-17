@@ -109,13 +109,13 @@ const items = [
     ],
   },
   {
-    key: "eployee",
-    label: "Eployee",
+    key: "employee",
+    label: "Employee",
     icon: <PieChartOutlined />,
     children: [
       {
-        key: "eployeee",
-        label: "Eployee",
+        key: "employee",
+        label: "Employee",
         children: null,
       },
       {

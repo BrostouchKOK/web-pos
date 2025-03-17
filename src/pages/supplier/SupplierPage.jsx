@@ -139,7 +139,6 @@ const SupplierPage = () => {
   };
   return (
     <MainPage laoding={state.loading}>
-      <h1>{dayjs().format("DD-MMM-YYYY h:mm A")}</h1>
       <div className="d-flex justify-content-between align-items-center w-100">
         <div className="d-flex justify-content-between">
           <h4>Supplier</h4>

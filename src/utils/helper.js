@@ -2,8 +2,10 @@ import axios from "axios";
 import { Config } from "./config";
 import { setServerStatus } from "../store/service.store";
 import { getAccessToken } from "../store/profile.store";
+import dayjs from "dayjs";
+import { data } from "react-router-dom";
 
-export const request = (url = "", method = "get", data={}) => {
+export const request = (url = "", method = "get", data = {}) => {
   console.log("access_token", getAccessToken());
   var access_token = getAccessToken();
   // in react
@@ -47,4 +49,15 @@ export const request = (url = "", method = "get", data={}) => {
       console.log(err);
       return false;
     });
+};
+
+// formart data client and server
+export const formatDateClient = (date, format = "DD-MM-YYYY") => {
+  if(date) return dayjs(date).format(format);
+  return null;
+};
+
+export const formatDateServer = (date, format = "YYYY-MM-DD") => {
+  if(date) return dayjs(date).format(format);
+  return null;
 };

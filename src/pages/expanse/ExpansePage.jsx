@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { formatDateClient, request } from "../../utils/helper";
+import { request } from "../../utils/helper";
 import {
   Button,
   Form,
@@ -14,8 +14,10 @@ import {
 import { MdDelete, MdEdit } from "react-icons/md";
 import Swal from "sweetalert2";
 import MainPage from "../../components/layout/MainPage";
+import { configStore } from "../../store/configStore";
 
-const EmployeePage = () => {
+const ExpansePage = () => {
+  const {config} = configStore
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [state, setState] = useState({
@@ -25,7 +27,7 @@ const EmployeePage = () => {
     description: "",
     status: "",
     parentId: null,
-    txtSearch : "",
+    txtSearch: "",
   });
   const [formRef] = Form.useForm();
 
@@ -36,17 +38,16 @@ const EmployeePage = () => {
   // GetList Function
   const getList = async () => {
     var param = {
-      txtSearch : state.txtSearch
-    }
-    const res = await request("employee", "get",param);
-    // alert(JSON.stringify(res));
+      txtSearch: state.txtSearch,
+    };
+    const res = await request("expanse", "get", param);
     setLoading(true);
     if (res) {
       setLoading(false);
       setList(res.list);
-      // console.log(res.list);
     }
   };
+  console.log(list)
   // onClickEdit Function
   const onClickEdit = (data) => {
     setState({
@@ -55,7 +56,7 @@ const EmployeePage = () => {
     });
     formRef.setFieldsValue({
       id: data.id, // hidden id
-      ...data
+      ...data,
     });
   };
   // onClickDelete Function
@@ -70,17 +71,20 @@ const EmployeePage = () => {
       confirmButtonText: "Yes, delete it!",
     }).then(async (result) => {
       if (result.isConfirmed) {
-        const res = await request("employee", "delete", {
-          
+        const res = await request("expense", "delete", {
           id: data.id,
         });
         // alert(JSON.stringify(res));
 
         if (res && !res.error) {
-          Swal.fire("Deleted!", res.message || "employee has been deleted.", "success");
+          Swal.fire(
+            "Deleted!",
+            res.message || "expense has been deleted.",
+            "success"
+          );
           getList(); // Refresh the list after deletion
         } else {
-          Swal.fire("Error!", "Failed to delete employee.", "error");
+          Swal.fire("Error!", "Failed to delete expense.", "error");
         }
       }
     });
@@ -116,13 +120,13 @@ const EmployeePage = () => {
         // case update
         method = "put";
       }
-      const res = await request("employee", method, data);
+      const res = await request("expense", method, data);
 
       if (res && !res.error) {
         Swal.fire({
           icon: "success",
           title: "Success!",
-          text: res.message || "employee saved successfully!",
+          text: res.message || "expense saved successfully!",
           timer: 2000,
           showConfirmButton: false,
         });
@@ -133,7 +137,7 @@ const EmployeePage = () => {
         Swal.fire({
           icon: "error",
           title: "Error!",
-          text: res?.message || "Failed to save employee",
+          text: res?.message || "Failed to save expense",
         });
       }
     } catch (error) {
@@ -150,18 +154,22 @@ const EmployeePage = () => {
     <MainPage laoding={loading}>
       <div className="d-flex justify-content-between align-items-center w-100">
         <div className="d-flex w-100">
-          <h5>Employee List</h5>
+          <h5>Expense</h5>
           <Input.Search
             className="mx-3 w-auto"
             allowClear
             placeholder="search here..."
-            onChange={(e)=>setState((prev)=>({
-              ...prev,
-              txtSearch : e.target.value,
-            }))}
+            onChange={(e) =>
+              setState((prev) => ({
+                ...prev,
+                txtSearch: e.target.value,
+              }))
+            }
             onSearch={getList}
           />
-          <Button type="primary" onClick={getList}>Filter</Button>
+          <Button type="primary" onClick={getList}>
+            Filter
+          </Button>
         </div>
         <div>
           <Button type="primary" onClick={onClickAddBtn}>
@@ -173,45 +181,37 @@ const EmployeePage = () => {
       <Modal
         open={state.visibleModal}
         title={
-          formRef.getFieldValue("id") ? "Edit Employee" : "Create Employee"
+          formRef.getFieldValue("id") ? "Edit expense" : "Create expense"
         }
         footer={null}
         onCancel={onCancelModal}
       >
         <Form layout="vertical" onFinish={onFinish} form={formRef}>
-          <Form.Item label="Firstname" name={"firstname"}>
-            <Input placeholder="firstname" />
-          </Form.Item>
-          <Form.Item label="Lastname" name={"lastname"}>
-            <Input placeholder="lastname" />
-          </Form.Item>
-          <Form.Item label="Gender" name={"gender"}>
+          <Form.Item label="expense_type_id" name={"expense_type_id"}>
             <Select
-              placeholder = "Select gender"
-              options={[
-                {
-                  label : "Male",
-                  value : 1,
-                },
-                {
-                  label : "Female",
-                  value : 0,
-                }
-              ]}
+              placeholder = "Select exspanse type name"
+              // options={config?.expense_type?.map((item,index)=>({
+              //   label : item.name,
+              //   value : item.id,
+              // }))}
             />
           </Form.Item>
-          <Form.Item label="Telephone" name={"tel"}>
-            <Input placeholder="Input employee telephone" />
+          <Form.Item label="Expanse Name" name={"name"}>
+            <Input placeholder="Input expense name" />
           </Form.Item>
-          <Form.Item label="Email" name={"email"}>
-            <Input placeholder="Input employee email" />
+          <Form.Item label="Ref no" name={"ref_no"}>
+            <Input placeholder="Input expense ref_no" />
           </Form.Item>
-          <Form.Item label="Address" name={"address"}>
-            <Input placeholder="address" />
+          <Form.Item label="Amount" name={"amount"}>
+            <Input placeholder="Input expense amount" />
           </Form.Item>
-          <Form.Item label="position" name={"position"}>
-            <Input placeholder="position" />
+          <Form.Item label="Remark" name={"remark"}>
+            <Input placeholder="Input expense remark" />
           </Form.Item>
+          <Form.Item label="Expense date" name={"expense_date"}>
+            <Input placeholder="Input expense expense date" />
+          </Form.Item>
+
           <Space className="mt-2">
             <Button onClick={onCancelModal}>Cancel</Button>
             <Button type="primary" htmlType="submit">
@@ -224,52 +224,45 @@ const EmployeePage = () => {
         className="mt-2"
         dataSource={list}
         columns={[
+          // {
+          //   key: "No",
+          //   title: "No",
+          //   render: (item, data, index) => index + 1,
+          // },
           {
-            key: "No",
-            title: "No",
-            render: (item, data, index) => index + 1,
+            key: "expense_type_id",
+            title: "Expense type",
+            dataIndex: "expanse_type_name",
           },
           {
-            key: "firstname",
-            title: "firstname",
-            dataIndex: "firstname",
+            key: "name",
+            title: "Name",
+            dataIndex: "name",
           },
           {
-            key: "lastname",
-            title: "lastname",
-            dataIndex: "lastname",
+            key: "ref_no",
+            title: "Ref no",
+            dataIndex: "ref_no",
           },
           {
-            key: "gender",
-            title: "gender",
-            dataIndex: "gender",
-            render : (value) => value? "Male":"Female",
+            key: "amount",
+            title: "Amount",
+            dataIndex: "amount",
           },
           {
-            key: "tel",
-            title: "Tel",
-            dataIndex: "tel",
+            key: "remark",
+            title: "Remark",
+            dataIndex: "remark",
           },
           {
-            key: "email",
-            title: "Email",
-            dataIndex: "email",
+            key: "expense_date",
+            title: "Expense date",
+            dataIndex: "expense_date",
           },
           {
-            key: "address",
-            title: "address",
-            dataIndex: "address",
-          },
-          {
-            key: "position",
-            title: "position",
-            dataIndex: "position",
-          },
-          {
-            key: "create_at",
-            title: "Create at",
-            dataIndex: "create_at",
-            render : (value) => formatDateClient(value),
+            key: "create_by",
+            title: "Create by",
+            dataIndex: "create_by",
           },
           {
             key: "action",
@@ -278,15 +271,14 @@ const EmployeePage = () => {
             render: (item, data, index) => (
               <Space>
                 <Button
-                  className="p-2"
                   type="primary"
                   danger
                   onClick={() => onClickDelete(data)}
                 >
-                  <MdDelete className="fs-6" />
+                  <MdDelete className="fs-5" />
                 </Button>
-                <Button className="p-2" type="primary" onClick={() => onClickEdit(data)}>
-                  <MdEdit className="fs-6" />
+                <Button type="primary" onClick={() => onClickEdit(data)}>
+                  <MdEdit className="fs-5" />
                 </Button>
               </Space>
             ),
@@ -297,4 +289,4 @@ const EmployeePage = () => {
   );
 };
 
-export default EmployeePage;
+export default ExpansePage;
