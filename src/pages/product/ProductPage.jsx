@@ -16,11 +16,10 @@ import {
   Tag,
   Upload,
 } from "antd";
-import { MdDelete, MdEdit } from "react-icons/md";
+import { MdDelete, MdEdit, MdOutlineImageNotSupported } from "react-icons/md";
 import Swal from "sweetalert2";
 import MainPage from "../../components/layout/MainPage";
 import { configStore } from "../../store/configStore";
-import image_placeholder from "../../assets/image_placeholder.png";
 
 const getBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -29,20 +28,20 @@ const getBase64 = (file) =>
     reader.onload = () => resolve(reader.result);
     reader.onerror = (error) => reject(error);
   });
-
 const ProductPage = () => {
+  const [form] = Form.useForm();
   const { config } = configStore();
   const [state, setState] = useState({
-    visibleModal: false,
     list: [],
+    visibleModal: false,
+    id: null,
+    laoding: false,
   });
   const [filter, setFilter] = useState({
     txt_search: "",
     category_id: "",
     brand: "",
   });
-
-  const [form] = Form.useForm();
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
   const [imageDefault, setImageDefault] = useState([]);
@@ -52,15 +51,14 @@ const ProductPage = () => {
     getList();
   }, []);
 
-  // getList Fucntion
+  // getList Function
   const getList = async () => {
     var param = {
-      // text_search : filter.text_search,
+      // sort hand
+      ...filter,
+      // txt_search : filter.txt_search,
       // category_id : filter.category_id,
       // brand : filter.brand,
-
-      // sorthand
-      ...filter,
     };
     const res = await request("product", "get", param);
     if (res && !res.error) {
@@ -69,112 +67,111 @@ const ProductPage = () => {
         list: res.list,
       }));
     }
+    // console.log(res);
   };
+  console.log(state.list);
 
-  // handleNewBtn Functioin
-  const handleNewBtn = async () => {
-    setState((prev) => ({
-      ...prev,
-      visibleModal: true,
-    }));
+  // handleBtnNew Function
+  const handleBtnNew = async () => {
     const res = await request("new_barcode", "post");
     if (res && !res.error) {
       form.setFieldValue("barcode", res.barcode);
+      setState((prev) => ({
+        ...prev,
+        visibleModal: true,
+      }));
     }
-    // form.setFieldsValue({
-    //   name : "Apple 001",
-    //   category_id : 1,
-    //   brand : "Apple",
-    //   price : 1000,
-    //   qty : 10,
-    // })
   };
-  // handleCloseModal Function
-  const handleCloseModal = () => {
+
+  // handleCancelModal Function
+  const handleCancelModal = () => {
     setState((prev) => ({
       ...prev,
       visibleModal: false,
     }));
+    form.resetFields();
     setImageDefault([]);
     setImageOptional([]);
-    form.resetFields();
   };
-  // onFinish Function
-  const onFinish = async (items) => {
-    console.log(items);
+  // aa
+  // category_id	barcode	name	brand	description	qty	price	discount	status	image
+  // handleFinish Function
 
-    // Create form data
-    const params = new FormData();
-    params.append("name", items.name);
-    params.append("category_id", items.category_id);
-    params.append("barcode", items.barcode);
-    params.append("brand", items.brand);
-    params.append("description", items.description);
-    params.append("qty", items.qty);
-    params.append("price", items.price);
-    params.append("discount", items.discount);
-    params.append("status", items.status);
-
-    // when update use this two keys
-    params.append("image", form.getFieldValue("image")); // just name image
-    params.append("id", form.getFieldValue("id"));
-    //
-
-    if (items.image_default) {
-      if (items.image_default.file.status === "removed") {
-        params.append("image_remove", "1");
-      } else {
-        params.append(
-          "image_upload",
-          items.image_default.file.originFileObj,
-          items.image_default.file.name
-        );
-      }
-    }
-    if(items.image_optional){
-      // console.log(items.image_optional);
-      items.image_optional.fileList.map((item,index)=>{
-        // multiple image
-        params.append(
-          "image_upload_optoinal",
-          item.originFileObj,
-          item.name,
-        )
-      })
-    }
+  const handleFinish = async (item) => {
     try {
+      var params = new FormData();
+      params.append("name", item.name);
+      params.append("category_id", item.category_id);
+      params.append("barcode", item.barcode);
+      params.append("brand", item.brand);
+      params.append("description", item.description);
+      params.append("qty", item.qty);
+      params.append("price", item.price);
+      params.append("discount", item.discount);
+      params.append("status", item.status);
+
+      // when update use this two more key
+      params.append("image", form.getFieldValue("image")); // just name image
+      params.append("id", form.getFieldValue("id"));
+
+      if (item.image_default) {
+        if (item.image_default.file.status === "removed") {
+          params.append("image_remove", "1");
+        } else {
+          params.append(
+            "upload_image",
+            item.image_default.file.originFileObj,
+            item.image_default.file.name,
+          );
+        }
+      }
+      if (item.image_optional) {
+        item.image_optional.fileList?.map((items, index) => {
+          params.append(
+            "upload_image_optional",
+            items.originFileObj,
+            items.name,
+          );
+        });
+      }
       var method = "post";
       if (form.getFieldValue("id")) {
         method = "put";
       }
       const res = await request("product", method, params);
+
       if (res && !res.error) {
         Swal.fire({
-          title: "Success!",
-          text: res.message || "Product added successfully!",
           icon: "success",
+          title: "Success",
+          text: res.message,
           showConfirmButton: false,
           timer: 2000,
         });
-        setImageDefault([]); // Reset imageDefault
-        setImageOptional([]); // Reset imageOptional
-        handleCloseModal();
+        handleCancelModal();
         getList();
+      } else if (res.error) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: res.error.barcode || "Barcode exist",
+        });
       } else {
         Swal.fire({
           icon: "error",
-          text: res.error.barcode,
-          title: "Error!",
-          confirmButtonText: "Try Again",
+          title: "Error",
+          text: "Something went wrong! Please try again.",
         });
       }
+
+      console.log(res);
     } catch (error) {
       Swal.fire({
-        title: "Error!",
-        text: error.message,
         icon: "error",
-        confirmButtonText: "OK",
+        title: "Error",
+        text: "An unexpected error occurred!",
       });
+      console.error(error);
     }
   };
 
@@ -190,13 +187,8 @@ const ProductPage = () => {
   const handleChangeImageOptional = ({ fileList: newFileList }) =>
     setImageOptional(newFileList);
 
-  // handleFilter Function
-  const handleFilter = () => {
-    getList();
-  };
-
-  // handleDelete Functon
-  const handleDelete = async (data, index) => {
+  // handleDelete Function
+  const handleDelete = async (items) => {
     Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -205,13 +197,18 @@ const ProductPage = () => {
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
       confirmButtonText: "Yes, delete it!",
-    }).then(async (resutl) => {
-      if (resutl.isConfirmed) {
+    }).then(async (result) => {
+      if (result.isConfirmed) {
         const res = await request("product", "delete", {
-          id: data.id,
+          id: items.id,
         });
+
         if (res && !res.error) {
-          Swal.fire("Deleted!", "Product has been deleted.", "success");
+          Swal.fire(
+            "Deleted!",
+            res.message || "Product has been deleted.",
+            "success"
+          );
           getList(); // Refresh the list after deletion
         } else {
           Swal.fire("Error!", "Failed to delete product.", "error");
@@ -219,31 +216,31 @@ const ProductPage = () => {
       }
     });
   };
-
-  // handleEdit Function
-  const handleEdit = (data, index) => {
+  const handleEdit = (items) => {
     setState((prev) => ({
       ...prev,
       visibleModal: true,
     }));
     form.setFieldsValue({
-      id: data.id,
-      ...data,
+      ...items,
     });
-    if (data.image != "" && data.image != null) {
-      const imageProduct = [
-        {
-          uid: "-1",
-          name: data.image,
-          status: "done",
-          url:
-            "http://localhost/full_stack/POS_Phone_Shop_Images/" + data.image,
-        },
-      ];
+    const imageProduct = [
+      {
+        uid: "-1",
+        name: items.image,
+        status: "done",
+        url: `http://localhost/full_stack/POS_Phone_Shop_Images/${items.image}`,
+      },
+    ];
+    if (items.image) {
       setImageDefault(imageProduct);
     }
   };
 
+  // handleFilter Function
+  const handleFilter = () => {
+    getList();
+  };
   return (
     <MainPage laoding={false}>
       <div className="d-flex justify-content-between align-items-center w-100">
@@ -253,49 +250,33 @@ const ProductPage = () => {
             className="mx-3 w-auto"
             allowClear
             placeholder="search here..."
-            onChange={(event) =>
-              setFilter((prev) => ({
-                ...prev,
-                txt_search: event.target.value,
-              }))
+            onChange={(e) =>
+              setFilter((prev) => ({ ...prev, txt_search: e.target.value }))
             }
+            onSearch={getList}
           />
           <Select
+            className="w-25"
+            allowClear
             placeholder="Select category"
-            className="w-auto"
-            allowClear
-            options={config?.category?.map((items, index) => ({
-              label: items.name,
-              value: items.id,
-            }))}
+            options={config.category}
             onChange={(id) =>
-              setFilter((prev) => ({
-                ...prev,
-                category_id: id,
-              }))
+              setFilter((prev) => ({ ...prev, category_id: id }))
             }
           />
           <Select
-            placeholder="Select brand"
-            className="w-auto mx-3"
+            className="mx-3"
             allowClear
-            options={config?.brand?.map((items, index) => ({
-              label: items.label,
-              value: items.value,
-            }))}
-            onChange={(id) =>
-              setFilter((prev) => ({
-                ...prev,
-                brand: id,
-              }))
-            }
+            placeholder="Select brand"
+            options={config?.brand}
+            onChange={(id) => setFilter((prev) => ({ ...prev, brand: id }))}
           />
           <Button type="primary" onClick={handleFilter}>
             Filter
           </Button>
         </div>
         <div>
-          <Button type="primary" onClick={handleNewBtn}>
+          <Button type="primary" onClick={handleBtnNew}>
             + New
           </Button>
         </div>
@@ -303,25 +284,25 @@ const ProductPage = () => {
 
       <Modal
         open={state.visibleModal}
-        title={form.getFieldValue("id") ? "Edit product" : "Create New product"}
+        title={form.getFieldValue("id") ? "Edit Product" : "Create Product"}
         footer={null}
-        onCancel={handleCloseModal}
-        width={700}
+        onCancel={handleCancelModal}
+        className="w-50"
       >
-        <Form layout="vertical" onFinish={onFinish} form={form}>
+        <Form layout="vertical" onFinish={handleFinish} form={form}>
           <Row gutter={8}>
             <Col span={12}>
               <Form.Item
-                label="Product name"
+                label="Name"
                 name={"name"}
                 rules={[
                   {
                     required: true,
-                    message: "Please input product name!",
+                    message: "Please fill in name",
                   },
                 ]}
               >
-                <Input placeholder="Input product name" />
+                <Input placeholder="Product name" />
               </Form.Item>
               <Form.Item
                 label="Brand"
@@ -329,36 +310,46 @@ const ProductPage = () => {
                 rules={[
                   {
                     required: true,
-                    message: "Please select brand!",
+                    message: "Please select brand",
                   },
                 ]}
               >
                 <Select
                   placeholder="Select brand"
                   allowClear
-                  options={config?.brand}
+                  options={config.brand}
                 />
               </Form.Item>
-              <Form.Item label="Bacode" name={"barcode"}>
-                <Input disabled placeholder="barcode" />
-              </Form.Item>
+
               <Form.Item
-                label="Quantity"
+                label="Qty"
                 name={"qty"}
                 rules={[
                   {
                     required: true,
-                    message: "Please input quantity!",
+                    message: "Please fill in qty",
                   },
                 ]}
               >
-                <InputNumber
-                  className="w-100"
-                  placeholder="Input product qty"
+                <InputNumber className="w-100" placeholder="qty" />
+              </Form.Item>
+              <Form.Item label="Status" name={"status"}>
+                <Select
+                  placeholder="Select status"
+                  options={[
+                    {
+                      label: "Active",
+                      value: 1,
+                    },
+                    {
+                      label: "InActive",
+                      value: 0,
+                    },
+                  ]}
                 />
               </Form.Item>
-              <Form.Item label="Desctiption" name={"description"}>
-                <Input.TextArea placeholder="Input category description" />
+              <Form.Item label="Description" name={"description"}>
+                <Input.TextArea placeholder="description" />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -368,55 +359,34 @@ const ProductPage = () => {
                 rules={[
                   {
                     required: true,
-                    message: "Please select category!",
+                    message: "Please select category",
                   },
                 ]}
               >
                 <Select
                   placeholder="Select category"
                   allowClear
-                  options={config?.category?.map((item) => ({
-                    label: item.name,
-                    value: item.id,
-                  }))}
+                  options={config.category}
                 />
               </Form.Item>
-
               <Form.Item
-                label="Product price"
+                label="Price"
                 name={"price"}
                 rules={[
                   {
                     required: true,
-                    message: "Please input price!",
+                    message: "Please fill in price",
                   },
                 ]}
               >
-                <InputNumber
-                  className="w-100"
-                  placeholder="Input product price"
-                />
+                <InputNumber className="w-100" placeholder="price" />
               </Form.Item>
-              <Form.Item label="Status" name={"status"}>
-                <Select
-                  placeholder="Select status"
-                  options={[
-                    {
-                      label: "Avtive",
-                      value: 1,
-                    },
-                    {
-                      label: "Inactive",
-                      value: 0,
-                    },
-                  ]}
-                />
+              <Form.Item label="Barcode" name="barcode">
+                <Input disabled placeholder="barcode" />
               </Form.Item>
-              <Form.Item label="Product discount" name={"discount"}>
-                <InputNumber
-                  className="w-100"
-                  placeholder="Input product discount"
-                />
+
+              <Form.Item label="Discount" name={"discount"}>
+                <InputNumber className="w-100" placeholder="discount" />
               </Form.Item>
             </Col>
           </Row>
@@ -426,13 +396,13 @@ const ProductPage = () => {
               customRequest={(options) => {
                 options.onSuccess();
               }}
-              maxCount={1}
               listType="picture-card"
+              maxCount={1}
               fileList={imageDefault}
               onPreview={handlePreview}
               onChange={handleChangeImageDefault}
             >
-              <div>+ Upload</div>
+              <div>+Upload</div>
             </Upload>
           </Form.Item>
           <Form.Item label="Image(Optional)" name={"image_optional"}>
@@ -442,12 +412,12 @@ const ProductPage = () => {
               }}
               listType="picture-card"
               multiple={true}
-              maxCount={5}
+              maxCount={4}
               fileList={imageOptional}
               onPreview={handlePreview}
               onChange={handleChangeImageOptional}
             >
-              <div>+ Upload</div>
+              <div>+Upload</div>
             </Upload>
           </Form.Item>
           {previewImage && (
@@ -463,14 +433,12 @@ const ProductPage = () => {
               src={previewImage}
             />
           )}
-          <div className="d-flex justify-content-end mt-2">
-            <Space>
-              <Button onClick={handleCloseModal}>Cancel</Button>
-              <Button type="primary" htmlType="submit">
-                {form.getFieldValue("id") ? "Update" : "Save"}
-              </Button>
-            </Space>
-          </div>
+          <Space className="mt-2 d-flex justify-content-end">
+            <Button onClick={handleCancelModal}>Cancel</Button>
+            <Button type="primary" htmlType="submit">
+              {form.getFieldValue("id") ? "Update" : "Save"}
+            </Button>
+          </Space>
         </Form>
       </Modal>
       <Table
@@ -483,24 +451,19 @@ const ProductPage = () => {
             dataIndex: "name",
           },
           {
-            key: "barcode",
-            title: "Barcode",
-            dataIndex: "barcode",
-          },
-          {
-            key: "description",
-            title: "Description",
-            dataIndex: "description",
-          },
-          {
-            key: "category_name",
-            title: "Category Name",
+            key: "category",
+            title: "Category",
             dataIndex: "category_name",
           },
           {
             key: "brand",
             title: "Brand",
             dataIndex: "brand",
+          },
+          {
+            key: "barcode",
+            title: "Barcode",
+            dataIndex: "barcode",
           },
           {
             key: "price",
@@ -518,6 +481,32 @@ const ProductPage = () => {
             dataIndex: "discount",
           },
           {
+            key: "description",
+            title: "Description",
+            dataIndex: "description",
+          },
+          {
+            key: "image",
+            title: "Image",
+            dataIndex: "image",
+            render: (value) =>
+              // "C:/xampp/htdocs/full_stack/POS_Phone_Shop_Images/" + value,
+              value ? (
+                <Image
+                  src={
+                    "http://localhost/full_stack/POS_Phone_Shop_Images/" + value
+                  }
+                  style={{ width: 40 }}
+                />
+              ) : (
+                <div
+                  style={{ background: "#eee", width: 40, cursor: "pointer" }}
+                >
+                  <MdOutlineImageNotSupported className="w-100" />
+                </div>
+              ),
+          },
+          {
             key: "status",
             title: "Status",
             dataIndex: "status",
@@ -529,40 +518,25 @@ const ProductPage = () => {
               ),
           },
           {
-            key: "image",
-            title: "Image",
-            dataIndex: "image",
-            // render: (value) =>
-            //   "http://localhost/full_stack/POS_Phone_Shop_Images/" + value,
-            render: (value) =>
-              value ? (
-                <Image
-                  src={
-                    "http://localhost/full_stack/POS_Phone_Shop_Images/" + value
-                  }
-                  style={{ width: 40 }}
-                />
-              ) : (
-                <div className="bg-secondary">
-                  <Image src={image_placeholder} style={{ width: 40 }} />
-                </div>
-              ),
-          },
-          {
             key: "action",
             title: "Action",
             align: "center",
             render: (item, data, index) => (
               <Space>
                 <Button
+                  className="p-2"
                   type="primary"
                   danger
                   onClick={() => handleDelete(data)}
                 >
-                  <MdDelete className="fs-5" />
+                  <MdDelete className="fs-6" />
                 </Button>
-                <Button type="primary" onClick={() => handleEdit(data)}>
-                  <MdEdit className="fs-5" />
+                <Button
+                  className="p-2"
+                  type="primary"
+                  onClick={() => handleEdit(data)}
+                >
+                  <MdEdit className="fs-6" />
                 </Button>
               </Space>
             ),

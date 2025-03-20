@@ -25,7 +25,7 @@ const EmployeePage = () => {
     description: "",
     status: "",
     parentId: null,
-    txtSearch : "",
+    txtSearch: "",
   });
   const [formRef] = Form.useForm();
 
@@ -36,9 +36,9 @@ const EmployeePage = () => {
   // GetList Function
   const getList = async () => {
     var param = {
-      txtSearch : state.txtSearch
-    }
-    const res = await request("employee", "get",param);
+      txtSearch: state.txtSearch,
+    };
+    const res = await request("employee", "get", param);
     // alert(JSON.stringify(res));
     setLoading(true);
     if (res) {
@@ -55,7 +55,7 @@ const EmployeePage = () => {
     });
     formRef.setFieldsValue({
       id: data.id, // hidden id
-      ...data
+      ...data,
     });
   };
   // onClickDelete Function
@@ -71,13 +71,14 @@ const EmployeePage = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         const res = await request("employee", "delete", {
-          
           id: data.id,
         });
-        // alert(JSON.stringify(res));
-
         if (res && !res.error) {
-          Swal.fire("Deleted!", res.message || "employee has been deleted.", "success");
+          Swal.fire(
+            "Deleted!",
+            res.message || "employee has been deleted.",
+            "success"
+          );
           getList(); // Refresh the list after deletion
         } else {
           Swal.fire("Error!", "Failed to delete employee.", "error");
@@ -155,13 +156,17 @@ const EmployeePage = () => {
             className="mx-3 w-auto"
             allowClear
             placeholder="search here..."
-            onChange={(e)=>setState((prev)=>({
-              ...prev,
-              txtSearch : e.target.value,
-            }))}
+            onChange={(e) =>
+              setState((prev) => ({
+                ...prev,
+                txtSearch: e.target.value,
+              }))
+            }
             onSearch={getList}
           />
-          <Button type="primary" onClick={getList}>Filter</Button>
+          <Button type="primary" onClick={getList}>
+            Filter
+          </Button>
         </div>
         <div>
           <Button type="primary" onClick={onClickAddBtn}>
@@ -187,16 +192,16 @@ const EmployeePage = () => {
           </Form.Item>
           <Form.Item label="Gender" name={"gender"}>
             <Select
-              placeholder = "Select gender"
+              placeholder="Select gender"
               options={[
                 {
-                  label : "Male",
-                  value : 1,
+                  label: "Male",
+                  value: 1,
                 },
                 {
-                  label : "Female",
-                  value : 0,
-                }
+                  label: "Female",
+                  value: 0,
+                },
               ]}
             />
           </Form.Item>
@@ -243,7 +248,7 @@ const EmployeePage = () => {
             key: "gender",
             title: "gender",
             dataIndex: "gender",
-            render : (value) => value? "Male":"Female",
+            render: (value) => (value ? "Male" : "Female"),
           },
           {
             key: "tel",
@@ -269,7 +274,7 @@ const EmployeePage = () => {
             key: "create_at",
             title: "Create at",
             dataIndex: "create_at",
-            render : (value) => formatDateClient(value),
+            render: (value) => formatDateClient(value),
           },
           {
             key: "action",
@@ -285,7 +290,11 @@ const EmployeePage = () => {
                 >
                   <MdDelete className="fs-6" />
                 </Button>
-                <Button className="p-2" type="primary" onClick={() => onClickEdit(data)}>
+                <Button
+                  className="p-2"
+                  type="primary"
+                  onClick={() => onClickEdit(data)}
+                >
                   <MdEdit className="fs-6" />
                 </Button>
               </Space>
